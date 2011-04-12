@@ -16,6 +16,8 @@
 
 package com.github.mediabuttons;
 
+import java.util.Hashtable;
+
 import com.github.mediabuttons.R;
 
 import android.app.PendingIntent;
@@ -24,15 +26,23 @@ import android.appwidget.AppWidgetProvider;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.media.AudioManager;
 import android.net.Uri;
+import android.os.Handler;
+import android.os.SystemClock;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.widget.RemoteViews;
 
 public class Widget extends AppWidgetProvider {
+	public final static String BROADCAST_MEDIA_BUTTON =
+		"com.github.mediabuttons.Widget.BROADCAST_MEDIA_BUTTON";
+	
     public void onUpdate(Context context, AppWidgetManager manager,
     		int[] appWidgetIds) {
         SharedPreferences prefs =
         	context.getSharedPreferences(Configure.PREFS_NAME, 0);
+        mViews.clear();
         for (int id: appWidgetIds) {
         	String pref_name = Configure.ACTION_PREF_PREFIX + id;
             int action_index = prefs.getInt(pref_name, 0);
@@ -42,25 +52,91 @@ public class Widget extends AppWidgetProvider {
 
 	public static void updateWidget(Context context, AppWidgetManager manager,
 			int id, int action_index) {
+		mContext = context;
+		mManager = manager;
 		
-		// Create an Intent for the media button
 		int keyCode = Configure.sKeyCode[action_index];
-        KeyEvent keyEvent = new KeyEvent(KeyEvent.ACTION_DOWN, keyCode);
-        Intent intent = new Intent(Intent.ACTION_MEDIA_BUTTON);
-        intent.setClass(context, Broadcaster.class);
-        // The URI is unused, but serves to differentiate multiple intents so
-        // that getService doesn't replace one using a different keycode.
+        Intent intent = new Intent(BROADCAST_MEDIA_BUTTON);
+        intent.setClass(context, Widget.class);
+        // The URI is not the right fit for the keycode data, but the URI
+        // has to be unique so that PendingIntent doesn't override the intents
+        // we create for each keycode.
         intent.setData(Uri.parse("http://" + keyCode));
-        intent.putExtra(Intent.EXTRA_KEY_EVENT, keyEvent);
-        PendingIntent pendingIntent = PendingIntent.getService(
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(
         		context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         RemoteViews views = new RemoteViews(context.getPackageName(),
         		R.layout.widget);
-        views.setImageViewResource(R.id.button, Configure.sImageResource[action_index]);
+        if (action_index == Configure.PLAY_PAUSE_ACTION) {
+        	AudioManager audioManager = (AudioManager)
+        			mContext.getSystemService(Context.AUDIO_SERVICE);
+        	setPlayPauseIcon(views, audioManager.isMusicActive());
+            mViews.put(id, views);
+        } else {
+        	views.setImageViewResource(R.id.button, Configure.sImageResource[action_index]);
+        }
         views.setOnClickPendingIntent(R.id.button, pendingIntent);
         
         manager.updateAppWidget(id, views);
 	}
-
+	
+	public static void setPlayPauseIcon(RemoteViews views, boolean isPlaying) {
+		if (isPlaying) {
+			views.setImageViewResource(R.id.button, R.drawable.pause);
+		} else {
+			views.setImageViewResource(R.id.button, R.drawable.play);
+		}
+	}
+	
+	@Override
+	public void onReceive(Context context, Intent intent) {
+		Log.i("MediaButtons", "intent " + intent.getAction());
+		if (intent.getAction().equals(BROADCAST_MEDIA_BUTTON)) {
+			int keycode = Integer.parseInt(intent.getData().getHost());
+			long upTime = SystemClock.uptimeMillis();
+			long downTime = upTime - 1;
+			
+			Log.i("MediaButtons", "Got keycode " + keycode);
+			
+            KeyEvent downKeyEvent = new KeyEvent(
+            	downTime, downTime, KeyEvent.ACTION_DOWN, keycode, 0);
+			Intent downIntent = new Intent(Intent.ACTION_MEDIA_BUTTON);
+            downIntent.putExtra(Intent.EXTRA_KEY_EVENT, downKeyEvent);
+            context.sendOrderedBroadcast(downIntent, null);
+            
+            KeyEvent upKeyEvent = new KeyEvent(
+            	downTime, upTime, KeyEvent.ACTION_UP, keycode, 0);
+			Intent upIntent = new Intent(Intent.ACTION_MEDIA_BUTTON);
+            upIntent.putExtra(Intent.EXTRA_KEY_EVENT, upKeyEvent);
+            context.sendOrderedBroadcast(upIntent, null);
+            
+            if (keycode == KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE) {
+            	mUpdateRepeat = 5;
+            	mHandler.removeCallbacks(mUpdateButton);
+            	mHandler.postDelayed(mUpdateButton, 300);
+            }
+		}
+	}
+	
+	private static Context mContext;
+	private static AppWidgetManager mManager;
+	private static Hashtable<Integer, RemoteViews> mViews = new Hashtable<Integer, RemoteViews>();
+	
+	private static int mUpdateRepeat = 0;
+	private static Handler mHandler = new Handler();
+	private static Runnable mUpdateButton = new Runnable() {
+		public void run() {
+			AudioManager audioManager = (AudioManager)
+					mContext.getSystemService(Context.AUDIO_SERVICE);
+			boolean isActive = audioManager.isMusicActive();
+			for (int id: mViews.keySet()) {
+				RemoteViews views = mViews.get(id);
+				setPlayPauseIcon(views, isActive);
+				mManager.updateAppWidget(id, views);
+			}
+			if (--mUpdateRepeat > 0) {
+				mHandler.postDelayed(this, 1000);
+			}
+		}
+	};
 }
