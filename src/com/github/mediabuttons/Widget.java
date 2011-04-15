@@ -23,6 +23,7 @@ import com.github.mediabuttons.R;
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -111,6 +112,7 @@ public class Widget extends AppWidgetProvider {
             context.sendOrderedBroadcast(upIntent, null);
             
             if (keycode == KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE) {
+                setupWidgetList(context);
             	musicPlaying = null; // Force an update the first time.
     			mContext = context;
             	mUpdateRepeat = 5;
@@ -120,7 +122,27 @@ public class Widget extends AppWidgetProvider {
 		}
 	}
 	
-	private static Context mContext = null;
+	private void setupWidgetList(Context context) {
+        if (mViews.size() > 0) {
+            return;
+        }
+        
+        Log.i(TAG, "Repopulating the list of widgets.");
+        AppWidgetManager manager = AppWidgetManager.getInstance(mContext);
+        ComponentName component = new ComponentName(context, Widget.class);
+        int[] widgetIds = manager.getAppWidgetIds(component);
+        SharedPreferences prefs =
+            context.getSharedPreferences(Configure.PREFS_NAME, 0);
+        for (int id: widgetIds) {
+            String pref_name = Configure.ACTION_PREF_PREFIX + id;
+            int action_index = prefs.getInt(pref_name, 0);
+            if (action_index == Configure.PLAY_PAUSE_ACTION) {
+                updateWidget(context, manager, id, action_index);
+            }
+        }
+    }
+
+    private static Context mContext = null;
 	private static Hashtable<Integer, RemoteViews> mViews = new Hashtable<Integer, RemoteViews>();
 	
 	private static Boolean musicPlaying = null;
@@ -138,10 +160,11 @@ public class Widget extends AppWidgetProvider {
 			boolean isActive = audioManager.isMusicActive();
 			if (musicPlaying == null || musicPlaying != isActive) {
 				musicPlaying = isActive;
+				AppWidgetManager manager = AppWidgetManager.getInstance(mContext);
 				for (int id: mViews.keySet()) {
 					RemoteViews views = mViews.get(id);
 					setPlayPauseIcon(views, isActive);
-					AppWidgetManager.getInstance(mContext).updateAppWidget(id, views);
+					manager.updateAppWidget(id, views);
 				}
 			}
 			if (--mUpdateRepeat > 0) {
