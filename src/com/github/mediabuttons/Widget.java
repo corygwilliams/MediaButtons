@@ -35,6 +35,7 @@ import android.view.KeyEvent;
 import android.widget.RemoteViews;
 
 public class Widget extends AppWidgetProvider {
+	public final static String TAG = "MediaButtons";
 	public final static String BROADCAST_MEDIA_BUTTON =
 		"com.github.mediabuttons.Widget.BROADCAST_MEDIA_BUTTON";
 	
@@ -52,8 +53,7 @@ public class Widget extends AppWidgetProvider {
 
 	public static void updateWidget(Context context, AppWidgetManager manager,
 			int id, int action_index) {
-		mContext = context;
-		mManager = manager;
+		Log.i(TAG, "Updating widget " + id);
 		
 		int keyCode = Configure.sKeyCode[action_index];
         Intent intent = new Intent(BROADCAST_MEDIA_BUTTON);
@@ -69,7 +69,7 @@ public class Widget extends AppWidgetProvider {
         		R.layout.widget);
         if (action_index == Configure.PLAY_PAUSE_ACTION) {
         	AudioManager audioManager = (AudioManager)
-        			mContext.getSystemService(Context.AUDIO_SERVICE);
+        			context.getSystemService(Context.AUDIO_SERVICE);
         	setPlayPauseIcon(views, audioManager.isMusicActive());
             mViews.put(id, views);
         } else {
@@ -90,13 +90,13 @@ public class Widget extends AppWidgetProvider {
 	
 	@Override
 	public void onReceive(Context context, Intent intent) {
-		Log.i("MediaButtons", "intent " + intent.getAction());
+		Log.i(TAG, "Got intent " + intent.getAction());
 		if (intent.getAction().equals(BROADCAST_MEDIA_BUTTON)) {
 			int keycode = Integer.parseInt(intent.getData().getHost());
 			long upTime = SystemClock.uptimeMillis();
 			long downTime = upTime - 1;
 			
-			Log.i("MediaButtons", "Got keycode " + keycode);
+			Log.i(TAG, "Got keycode " + keycode);
 			
             KeyEvent downKeyEvent = new KeyEvent(
             	downTime, downTime, KeyEvent.ACTION_DOWN, keycode, 0);
@@ -111,6 +111,8 @@ public class Widget extends AppWidgetProvider {
             context.sendOrderedBroadcast(upIntent, null);
             
             if (keycode == KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE) {
+            	musicPlaying = null; // Force an update the first time.
+    			mContext = context;
             	mUpdateRepeat = 5;
             	mHandler.removeCallbacks(mUpdateButton);
             	mHandler.postDelayed(mUpdateButton, 300);
@@ -118,21 +120,29 @@ public class Widget extends AppWidgetProvider {
 		}
 	}
 	
-	private static Context mContext;
-	private static AppWidgetManager mManager;
+	private static Context mContext = null;
 	private static Hashtable<Integer, RemoteViews> mViews = new Hashtable<Integer, RemoteViews>();
 	
+	private static Boolean musicPlaying = null;
 	private static int mUpdateRepeat = 0;
 	private static Handler mHandler = new Handler();
 	private static Runnable mUpdateButton = new Runnable() {
 		public void run() {
+			if (mContext == null) {
+				Log.e(TAG, "Unable to run play/pause handler because context is null");
+				return;
+			}
+			Log.i(TAG, "Play/pause handler called for " + mViews.size() + " widgets");
 			AudioManager audioManager = (AudioManager)
 					mContext.getSystemService(Context.AUDIO_SERVICE);
 			boolean isActive = audioManager.isMusicActive();
-			for (int id: mViews.keySet()) {
-				RemoteViews views = mViews.get(id);
-				setPlayPauseIcon(views, isActive);
-				mManager.updateAppWidget(id, views);
+			if (musicPlaying == null || musicPlaying != isActive) {
+				musicPlaying = isActive;
+				for (int id: mViews.keySet()) {
+					RemoteViews views = mViews.get(id);
+					setPlayPauseIcon(views, isActive);
+					AppWidgetManager.getInstance(mContext).updateAppWidget(id, views);
+				}
 			}
 			if (--mUpdateRepeat > 0) {
 				mHandler.postDelayed(this, 1000);
