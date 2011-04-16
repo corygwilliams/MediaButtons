@@ -40,21 +40,38 @@ public class Widget extends AppWidgetProvider {
 	public final static String BROADCAST_MEDIA_BUTTON =
 		"com.github.mediabuttons.Widget.BROADCAST_MEDIA_BUTTON";
 	
+	@Override
     public void onUpdate(Context context, AppWidgetManager manager,
     		int[] appWidgetIds) {
+        Log.i(TAG, "Updating for " + appWidgetIds.length + " widgets");
+        if (appWidgetIds.length == 0) {
+            Log.i(TAG, "No widgets to update?");
+            return;
+        }
         SharedPreferences prefs =
         	context.getSharedPreferences(Configure.PREFS_NAME, 0);
-        mViews.clear();
         for (int id: appWidgetIds) {
         	String pref_name = Configure.ACTION_PREF_PREFIX + id;
             int action_index = prefs.getInt(pref_name, 0);
             updateWidget(context, manager, id, action_index);
         }
     }
+	
+    @Override
+    public void onDeleted(Context context, int[] appWidgetIds) {
+        Log.i(TAG, "Deleting " + appWidgetIds.length + " widgets");
+        SharedPreferences.Editor prefs =
+            context.getSharedPreferences(Configure.PREFS_NAME, 0).edit();
+        for (int id: appWidgetIds) {
+            String pref_name = Configure.ACTION_PREF_PREFIX + id;
+            prefs.remove(pref_name);
+            mViews.remove(id);
+        }
+    }
 
 	public static void updateWidget(Context context, AppWidgetManager manager,
 			int id, int action_index) {
-		Log.i(TAG, "Updating widget " + id);
+		Log.i(TAG, "Updating widget " + id + " with action " + action_index);
 		
 		int keyCode = Configure.sKeyCode[action_index];
         Intent intent = new Intent(BROADCAST_MEDIA_BUTTON);
@@ -91,7 +108,8 @@ public class Widget extends AppWidgetProvider {
 	
 	@Override
 	public void onReceive(Context context, Intent intent) {
-		Log.i(TAG, "Got intent " + intent.getAction());
+		super.onReceive(context, intent);
+	    Log.i(TAG, "Got intent " + intent.getAction());
 		if (intent.getAction().equals(BROADCAST_MEDIA_BUTTON)) {
 			int keycode = Integer.parseInt(intent.getData().getHost());
 			long upTime = SystemClock.uptimeMillis();
@@ -131,15 +149,7 @@ public class Widget extends AppWidgetProvider {
         AppWidgetManager manager = AppWidgetManager.getInstance(mContext);
         ComponentName component = new ComponentName(context, Widget.class);
         int[] widgetIds = manager.getAppWidgetIds(component);
-        SharedPreferences prefs =
-            context.getSharedPreferences(Configure.PREFS_NAME, 0);
-        for (int id: widgetIds) {
-            String pref_name = Configure.ACTION_PREF_PREFIX + id;
-            int action_index = prefs.getInt(pref_name, 0);
-            if (action_index == Configure.PLAY_PAUSE_ACTION) {
-                updateWidget(context, manager, id, action_index);
-            }
-        }
+        onUpdate(context, manager, widgetIds);
     }
 
     private static Context mContext = null;
