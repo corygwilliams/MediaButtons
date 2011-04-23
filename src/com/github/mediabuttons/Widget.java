@@ -37,8 +37,6 @@ import android.widget.RemoteViews;
 
 public class Widget extends AppWidgetProvider {
 	public final static String TAG = "MediaButtons";
-	public final static String BROADCAST_MEDIA_BUTTON =
-		"com.github.mediabuttons.Widget.BROADCAST_MEDIA_BUTTON";
 	
 	@Override
     public void onUpdate(Context context, AppWidgetManager manager,
@@ -52,9 +50,14 @@ public class Widget extends AppWidgetProvider {
         	context.getSharedPreferences(Configure.PREFS_NAME, 0);
         for (int id: appWidgetIds) {
         	String pref_name = Configure.ACTION_PREF_PREFIX + id;
-            int action_index = prefs.getInt(pref_name, 0);
-            updateWidget(context, manager, id, action_index);
+            int action_index = prefs.getInt(pref_name, -1);
+            if (action_index != -1) {
+                updateWidget(context, manager, id, action_index);
+            } else {
+                Log.w(TAG, "Invalid id with no pref " + id);
+            }
         }
+        // TODO send invalidate
     }
 	
     @Override
@@ -65,37 +68,41 @@ public class Widget extends AppWidgetProvider {
         for (int id: appWidgetIds) {
             String pref_name = Configure.ACTION_PREF_PREFIX + id;
             prefs.remove(pref_name);
-            mViews.remove(id);
+            // TODO send invalidate
         }
     }
 
-	public static void updateWidget(Context context, AppWidgetManager manager,
-			int id, int action_index) {
-		Log.i(TAG, "Updating widget " + id + " with action " + action_index);
-		
-		int keyCode = Configure.sKeyCode[action_index];
-        Intent intent = new Intent(BROADCAST_MEDIA_BUTTON);
-        intent.setClass(context, Widget.class);
+    public static RemoteViews makeRemoteViews(Context context, int id, int action_index) {
+        Log.i(TAG, "Constructing widget " + id + " with action " + action_index);
+        
+        int keyCode = Configure.sKeyCode[action_index];
+        Intent intent = new Intent(Broadcaster.BROADCAST_MEDIA_BUTTON);
+        intent.setClass(context, Broadcaster.class);
         // The URI is not the right fit for the keycode data, but the URI
         // has to be unique so that PendingIntent doesn't override the intents
         // we create for each keycode.
         intent.setData(Uri.parse("http://" + keyCode));
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(
-        		context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent pendingIntent = PendingIntent.getService(
+                context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         RemoteViews views = new RemoteViews(context.getPackageName(),
-        		R.layout.widget);
+                R.layout.widget);
         if (action_index == Configure.PLAY_PAUSE_ACTION) {
-        	AudioManager audioManager = (AudioManager)
-        			context.getSystemService(Context.AUDIO_SERVICE);
-        	setPlayPauseIcon(views, audioManager.isMusicActive());
-            mViews.put(id, views);
+            AudioManager audioManager = (AudioManager)
+                    context.getSystemService(Context.AUDIO_SERVICE);
+            setPlayPauseIcon(views, audioManager.isMusicActive());
         } else {
-        	views.setImageViewResource(R.id.button, Configure.sImageResource[action_index]);
+            views.setImageViewResource(R.id.button, Configure.sImageResource[action_index]);
         }
-        views.setOnClickPendingIntent(R.id.button, pendingIntent);
+        views.setOnClickPendingIntent(R.id.button, pendingIntent);     
         
-        manager.updateAppWidget(id, views);
+        return views;
+    }
+    
+	public static void updateWidget(Context context, AppWidgetManager manager,
+			int id, int action_index) {
+	    Log.i(TAG, "Updating widget " + id);
+        manager.updateAppWidget(id, makeRemoteViews(context, id, action_index));
 	}
 	
 	public static void setPlayPauseIcon(RemoteViews views, boolean isPlaying) {
@@ -105,81 +112,4 @@ public class Widget extends AppWidgetProvider {
 			views.setImageViewResource(R.id.button, R.drawable.play);
 		}
 	}
-	
-	@Override
-	public void onReceive(Context context, Intent intent) {
-		super.onReceive(context, intent);
-	    Log.i(TAG, "Got intent " + intent.getAction());
-		if (intent.getAction().equals(BROADCAST_MEDIA_BUTTON)) {
-			int keycode = Integer.parseInt(intent.getData().getHost());
-			long upTime = SystemClock.uptimeMillis();
-			long downTime = upTime - 1;
-			
-			Log.i(TAG, "Got keycode " + keycode);
-			
-            KeyEvent downKeyEvent = new KeyEvent(
-            	downTime, downTime, KeyEvent.ACTION_DOWN, keycode, 0);
-			Intent downIntent = new Intent(Intent.ACTION_MEDIA_BUTTON);
-            downIntent.putExtra(Intent.EXTRA_KEY_EVENT, downKeyEvent);
-            context.sendOrderedBroadcast(downIntent, null);
-            
-            KeyEvent upKeyEvent = new KeyEvent(
-            	downTime, upTime, KeyEvent.ACTION_UP, keycode, 0);
-			Intent upIntent = new Intent(Intent.ACTION_MEDIA_BUTTON);
-            upIntent.putExtra(Intent.EXTRA_KEY_EVENT, upKeyEvent);
-            context.sendOrderedBroadcast(upIntent, null);
-            
-            if (keycode == KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE) {
-                setupWidgetList(context);
-            	musicPlaying = null; // Force an update the first time.
-    			mContext = context;
-            	mUpdateRepeat = 5;
-            	mHandler.removeCallbacks(mUpdateButton);
-            	mHandler.postDelayed(mUpdateButton, 300);
-            }
-		}
-	}
-	
-	private void setupWidgetList(Context context) {
-        if (mViews.size() > 0) {
-            return;
-        }
-        
-        Log.i(TAG, "Repopulating the list of widgets.");
-        AppWidgetManager manager = AppWidgetManager.getInstance(mContext);
-        ComponentName component = new ComponentName(context, Widget.class);
-        int[] widgetIds = manager.getAppWidgetIds(component);
-        onUpdate(context, manager, widgetIds);
-    }
-
-    private static Context mContext = null;
-	private static Hashtable<Integer, RemoteViews> mViews = new Hashtable<Integer, RemoteViews>();
-	
-	private static Boolean musicPlaying = null;
-	private static int mUpdateRepeat = 0;
-	private static Handler mHandler = new Handler();
-	private static Runnable mUpdateButton = new Runnable() {
-		public void run() {
-			if (mContext == null) {
-				Log.e(TAG, "Unable to run play/pause handler because context is null");
-				return;
-			}
-			Log.i(TAG, "Play/pause handler called for " + mViews.size() + " widgets");
-			AudioManager audioManager = (AudioManager)
-					mContext.getSystemService(Context.AUDIO_SERVICE);
-			boolean isActive = audioManager.isMusicActive();
-			if (musicPlaying == null || musicPlaying != isActive) {
-				musicPlaying = isActive;
-				AppWidgetManager manager = AppWidgetManager.getInstance(mContext);
-				for (int id: mViews.keySet()) {
-					RemoteViews views = mViews.get(id);
-					setPlayPauseIcon(views, isActive);
-					manager.updateAppWidget(id, views);
-				}
-			}
-			if (--mUpdateRepeat > 0) {
-				mHandler.postDelayed(this, 1000);
-			}
-		}
-	};
 }
