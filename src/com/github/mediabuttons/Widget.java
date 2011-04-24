@@ -26,6 +26,7 @@ import android.appwidget.AppWidgetProvider;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.media.AudioManager;
 import android.net.Uri;
@@ -36,12 +37,29 @@ import android.view.KeyEvent;
 import android.widget.RemoteViews;
 
 public class Widget extends AppWidgetProvider {
-	public final static String TAG = "MediaButtons";
-	
+
+    public final static String TAG = "MediaButtons";
+    
+    @Override
+    public void onDisabled(Context context) {
+        super.onDisabled(context);
+        Log.i(TAG, "onDisable called");
+        Repeater.stop(context);
+    }
+
+    @Override
+    public void onEnabled(Context context) {
+        super.onEnabled(context);
+        Log.i(TAG, "onEnabled called");
+        Repeater.start(context);
+    }
+
 	@Override
     public void onUpdate(Context context, AppWidgetManager manager,
     		int[] appWidgetIds) {
+        super.onUpdate(context, manager, appWidgetIds);
         Log.i(TAG, "Updating for " + appWidgetIds.length + " widgets");
+        Repeater.start(context);
         if (appWidgetIds.length == 0) {
             Log.i(TAG, "No widgets to update?");
             return;
@@ -62,6 +80,7 @@ public class Widget extends AppWidgetProvider {
 	
     @Override
     public void onDeleted(Context context, int[] appWidgetIds) {
+        super.onDeleted(context, appWidgetIds);
         Log.i(TAG, "Deleting " + appWidgetIds.length + " widgets");
         SharedPreferences.Editor prefs =
             context.getSharedPreferences(Configure.PREFS_NAME, 0).edit();

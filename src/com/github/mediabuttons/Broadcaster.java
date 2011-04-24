@@ -51,25 +51,34 @@ public class Broadcaster extends IntentService {
             sendOrderedBroadcast(upIntent, null);
             
             if (keycode == KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE) {
-                if (mUpdateButton != null) {
-                    mHandler.removeCallbacks(mUpdateButton);
-                }
-                mUpdateButton = new UpdaterRunnable(this);
-                mHandler.postDelayed(mUpdateButton, 300);
+                startUpdater(new UpdaterRunnable(this, 5));
             }
+        } else if (intent.getAction().equals(Intent.ACTION_HEADSET_PLUG)) {
+            startUpdater(new UpdaterRunnable(this, 5));
+        } else if (intent.getAction().equals(Intent.ACTION_SCREEN_ON)) {
+            startUpdater(new UpdaterRunnable(this, 1));
         }
+    }
+
+    private void startUpdater(UpdaterRunnable updater) {
+        if (mUpdateButton != null) {
+            mHandler.removeCallbacks(mUpdateButton);
+        }
+        mUpdateButton = updater;
+        mHandler.postDelayed(mUpdateButton, 300);
     }
 
     private class UpdaterRunnable implements Runnable {
         private Hashtable<Integer, RemoteViews> mViews = new Hashtable<Integer, RemoteViews>();
         private Boolean mMusicPlaying = null;
-        private int mUpdateRepeat = 5;
+        private int mUpdateRepeat;
         private Context mContext;
         private AppWidgetManager mManager;
         private AudioManager audioManager;
         
-        UpdaterRunnable(Context context) {
+        UpdaterRunnable(Context context, int repeat) {
             mContext = context;
+            mUpdateRepeat = repeat;
             Log.i(Widget.TAG, "Creating the list of play/pause widgets.");
             mManager = AppWidgetManager.getInstance(mContext);
             ComponentName component = new ComponentName(mContext, Widget.class);
