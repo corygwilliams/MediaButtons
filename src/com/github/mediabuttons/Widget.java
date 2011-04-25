@@ -36,14 +36,14 @@ public class Widget extends AppWidgetProvider {
     @Override
     public void onDisabled(Context context) {
         super.onDisabled(context);
-        Log.i(TAG, "onDisable called");
+        Log.d(TAG, "onDisable called");
         Repeater.stop(context);
     }
 
     @Override
     public void onEnabled(Context context) {
         super.onEnabled(context);
-        Log.i(TAG, "onEnabled called");
+        Log.d(TAG, "onEnabled called");
         Repeater.start(context);
     }
 
@@ -54,7 +54,7 @@ public class Widget extends AppWidgetProvider {
         Log.i(TAG, "Updating for " + appWidgetIds.length + " widgets");
         Repeater.start(context);
         if (appWidgetIds.length == 0) {
-            Log.i(TAG, "No widgets to update?");
+            Log.w(TAG, "No widgets to update?");
             return;
         }
         SharedPreferences prefs =
@@ -85,7 +85,7 @@ public class Widget extends AppWidgetProvider {
     }
 
     public static RemoteViews makeRemoteViews(Context context, int id, int action_index) {
-        Log.i(TAG, "Constructing widget " + id + " with action " + action_index);
+        Log.d(TAG, "Constructing widget " + id + " with action " + action_index);
         
         int keyCode = Configure.sKeyCode[action_index];
         Intent intent = new Intent(Broadcaster.BROADCAST_MEDIA_BUTTON);
@@ -113,7 +113,7 @@ public class Widget extends AppWidgetProvider {
     
 	public static void updateWidget(Context context, AppWidgetManager manager,
 			int id, int action_index) {
-	    Log.i(TAG, "Updating widget " + id);
+	    Log.d(TAG, "Updating widget " + id);
         manager.updateAppWidget(id, makeRemoteViews(context, id, action_index));
 	}
 	

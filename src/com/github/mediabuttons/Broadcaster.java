@@ -30,13 +30,13 @@ public class Broadcaster extends IntentService {
     @Override
     protected void onHandleIntent(Intent intent) {
         // TODO Auto-generated method stub
-        Log.i(Widget.TAG, "Got intent " + intent.getAction());
+        Log.d(Widget.TAG, "Got intent " + intent.getAction());
         if (intent.getAction().equals(BROADCAST_MEDIA_BUTTON)) {
             int keycode = Integer.parseInt(intent.getData().getHost());
             long upTime = SystemClock.uptimeMillis();
             long downTime = upTime - 1;
             
-            Log.i(Widget.TAG, "Got keycode " + keycode);
+            Log.d(Widget.TAG, "Got keycode " + keycode);
             
             KeyEvent downKeyEvent = new KeyEvent(
                 downTime, downTime, KeyEvent.ACTION_DOWN, keycode, 0);
@@ -79,7 +79,7 @@ public class Broadcaster extends IntentService {
         UpdaterRunnable(Context context, int repeat) {
             mContext = context;
             mUpdateRepeat = repeat;
-            Log.i(Widget.TAG, "Creating the list of play/pause widgets.");
+            Log.d(Widget.TAG, "Creating the list of play/pause widgets.");
             mManager = AppWidgetManager.getInstance(mContext);
             ComponentName component = new ComponentName(mContext, Widget.class);
             int[] widgetIds = mManager.getAppWidgetIds(component);
@@ -101,7 +101,7 @@ public class Broadcaster extends IntentService {
                 Log.e(Widget.TAG, "Unable to run play/pause handler because context is null");
                 return;
             }
-            Log.i(Widget.TAG, "Play/pause handler called for " + mViews.size() + " widgets");
+            Log.d(Widget.TAG, "Play/pause handler called for " + mViews.size() + " widgets");
             boolean isActive = audioManager.isMusicActive();
             if (mMusicPlaying == null || mMusicPlaying != isActive) {
                 mMusicPlaying = isActive;
