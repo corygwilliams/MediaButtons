@@ -16,24 +16,17 @@
 
 package com.github.mediabuttons;
 
-import java.util.Hashtable;
-
 import com.github.mediabuttons.R;
 
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.media.AudioManager;
 import android.net.Uri;
-import android.os.Handler;
-import android.os.SystemClock;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.widget.RemoteViews;
 
 public class Widget extends AppWidgetProvider {
