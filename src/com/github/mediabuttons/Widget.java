@@ -29,11 +29,17 @@ import android.net.Uri;
 import android.util.Log;
 import android.widget.RemoteViews;
 
+/**
+ * The widget for each media button.  Each widget is 1x1 and will be only a
+ * single button.
+ */
 public class Widget extends AppWidgetProvider {
 
     public final static String TAG = "MediaButtons";
     
-    private static RemoteViews[] sViews = new RemoteViews[Configure.NUM_ACTIONS];
+    // Each type of widget has the exact same layout, so we keep only one copy.
+    private static RemoteViews[] sViews =
+        new RemoteViews[Configure.NUM_ACTIONS];
     
     @Override
     public void onDisabled(Context context) {
@@ -54,11 +60,16 @@ public class Widget extends AppWidgetProvider {
     		int[] appWidgetIds) {
         super.onUpdate(context, manager, appWidgetIds);
         Log.i(TAG, "Updating for " + appWidgetIds.length + " widgets");
+        
+        // onUpdate seems to be often called in new processed even without
+        // ever seeing an onEnable, so make sure the Repeater is running.
         Repeater.start(context.getApplicationContext());
+        
         if (appWidgetIds.length == 0) {
             Log.w(TAG, "No widgets to update?");
             return;
         }
+        
         SharedPreferences prefs =
         	context.getSharedPreferences(Configure.PREFS_NAME, 0);
         for (int id: appWidgetIds) {
@@ -70,7 +81,8 @@ public class Widget extends AppWidgetProvider {
                 Log.w(TAG, "Invalid id with no pref " + id);
             }
         }
-        // TODO send invalidate
+        // The list of widget may have changed, so make Broadcaster reload.
+        Broadcaster.invalidateWidgetList(context);
     }
 	
     @Override
@@ -82,10 +94,19 @@ public class Widget extends AppWidgetProvider {
         for (int id: appWidgetIds) {
             String pref_name = Configure.ACTION_PREF_PREFIX + id;
             prefs.remove(pref_name);
-            // TODO send invalidate
         }
+        Broadcaster.invalidateWidgetList(context);
     }
 
+    /**
+     * Return a remote view for a widget with the given action.  Create one if
+     * it doesn't exist yet.
+     * 
+     * @param context   The current context.
+     * @param action_index   An index in action configuration tables in
+     *      Configure.  Represents which type of media button this is.
+     * @return   A RemoteViews for the widget requested.
+     */
     public synchronized static RemoteViews makeRemoteViews(Context context, int action_index) {
         if (sViews[action_index] == null) {
             int keyCode = Configure.sKeyCode[action_index];
@@ -114,12 +135,28 @@ public class Widget extends AppWidgetProvider {
         return sViews[action_index];
     }
     
+    /**
+     * Update the given widget id.
+     * 
+     * @param context   The current Context.
+     * @param manager   The AppWidgetManager for the widget.
+     * @param id   The id of the widget.
+     * @param action_index   An index in action configuration tables in
+     *      Configure.  Represents which type of media button this is. 
+     */
 	public static void updateWidget(Context context, AppWidgetManager manager,
 			int id, int action_index) {
 	    Log.d(TAG, "Updating widget " + id + " with action " + action_index);
         manager.updateAppWidget(id, makeRemoteViews(context, action_index));
 	}
 	
+	/**
+	 * Choose the correct icon to use for the play/pause widget based on
+	 * whether music is playing right now.
+	 * 
+	 * @param views   The RemoteViews to set the icon for.
+	 * @param isPlaying   Whether or not music is playing.
+	 */
 	public static void setPlayPauseIcon(RemoteViews views, boolean isPlaying) {
 		if (isPlaying) {
 			views.setImageViewResource(R.id.button, R.drawable.pause);
