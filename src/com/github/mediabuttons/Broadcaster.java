@@ -1,6 +1,8 @@
 package com.github.mediabuttons;
 
+import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.List;
 
 import android.app.IntentService;
 import android.appwidget.AppWidgetManager;
@@ -51,16 +53,18 @@ public class Broadcaster extends IntentService {
             sendOrderedBroadcast(upIntent, null);
             
             if (keycode == KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE) {
-                startUpdater(new UpdaterRunnable(this, 5));
+                startUpdater(5);
             }
         } else if (intent.getAction().equals(Intent.ACTION_HEADSET_PLUG)) {
-            startUpdater(new UpdaterRunnable(this, 5));
+            startUpdater(5);
         } else if (intent.getAction().equals(Intent.ACTION_SCREEN_ON)) {
-            startUpdater(new UpdaterRunnable(this, 1));
+            startUpdater(1);
         }
     }
 
-    private void startUpdater(UpdaterRunnable updater) {
+    private void startUpdater(int repeat) {
+        RemoteViews view = Widget.makeRemoteViews(this, Configure.PLAY_PAUSE_ACTION);
+        UpdaterRunnable updater = new UpdaterRunnable(this, view, repeat);
         if (mUpdateButton != null) {
             mHandler.removeCallbacks(mUpdateButton);
         }
@@ -69,19 +73,19 @@ public class Broadcaster extends IntentService {
     }
 
     private class UpdaterRunnable implements Runnable {
-        private Hashtable<Integer, RemoteViews> mViews = new Hashtable<Integer, RemoteViews>();
+        private RemoteViews mView;
+        private ArrayList<Integer> mWidgetIds = new ArrayList<Integer>();
         private Boolean mMusicPlaying = null;
         private int mUpdateRepeat;
-        private Context mContext;
         private AppWidgetManager mManager;
         private AudioManager audioManager;
         
-        UpdaterRunnable(Context context, int repeat) {
-            mContext = context;
+        UpdaterRunnable(Context context, RemoteViews view, int repeat) {
+            mView = view;
             mUpdateRepeat = repeat;
             Log.d(Widget.TAG, "Creating the list of play/pause widgets.");
-            mManager = AppWidgetManager.getInstance(mContext);
-            ComponentName component = new ComponentName(mContext, Widget.class);
+            mManager = AppWidgetManager.getInstance(context);
+            ComponentName component = new ComponentName(context, Widget.class);
             int[] widgetIds = mManager.getAppWidgetIds(component);
             SharedPreferences prefs =
                 context.getSharedPreferences(Configure.PREFS_NAME, 0);
@@ -89,26 +93,21 @@ public class Broadcaster extends IntentService {
                 String pref_name = Configure.ACTION_PREF_PREFIX + id;
                 int action_index = prefs.getInt(pref_name, -1);
                 if (action_index == Configure.PLAY_PAUSE_ACTION) {
-                    mViews.put(id, Widget.makeRemoteViews(mContext, id, action_index));
+                    mWidgetIds.add(id);
                 }
             }
             audioManager = (AudioManager)
-                    mContext.getSystemService(Context.AUDIO_SERVICE);
+                    context.getSystemService(Context.AUDIO_SERVICE);
         }
         
         public void run() {
-            if (mContext == null) {
-                Log.e(Widget.TAG, "Unable to run play/pause handler because context is null");
-                return;
-            }
-            Log.d(Widget.TAG, "Play/pause handler called for " + mViews.size() + " widgets");
+            Log.d(Widget.TAG, "Play/pause handler called for " + mWidgetIds.size() + " widgets");
             boolean isActive = audioManager.isMusicActive();
             if (mMusicPlaying == null || mMusicPlaying != isActive) {
                 mMusicPlaying = isActive;
-                for (int id: mViews.keySet()) {
-                    RemoteViews views = mViews.get(id);
-                    Widget.setPlayPauseIcon(views, isActive);
-                    mManager.updateAppWidget(id, views);
+                for (int id: mWidgetIds) {
+                    Widget.setPlayPauseIcon(mView, isActive);
+                    mManager.updateAppWidget(id, mView);
                 }
             }
             if (--mUpdateRepeat > 0) {

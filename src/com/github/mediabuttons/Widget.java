@@ -33,9 +33,11 @@ public class Widget extends AppWidgetProvider {
 
     public final static String TAG = "MediaButtons";
     
+    private static RemoteViews[] sViews = new RemoteViews[Configure.NUM_ACTIONS];
+    
     @Override
     public void onDisabled(Context context) {
-        super.onDisabled(context);
+        super.onDisabled(context.getApplicationContext());
         Log.d(TAG, "onDisable called");
         Repeater.stop(context);
     }
@@ -44,7 +46,7 @@ public class Widget extends AppWidgetProvider {
     public void onEnabled(Context context) {
         super.onEnabled(context);
         Log.d(TAG, "onEnabled called");
-        Repeater.start(context);
+        Repeater.start(context.getApplicationContext());
     }
 
 	@Override
@@ -52,7 +54,7 @@ public class Widget extends AppWidgetProvider {
     		int[] appWidgetIds) {
         super.onUpdate(context, manager, appWidgetIds);
         Log.i(TAG, "Updating for " + appWidgetIds.length + " widgets");
-        Repeater.start(context);
+        Repeater.start(context.getApplicationContext());
         if (appWidgetIds.length == 0) {
             Log.w(TAG, "No widgets to update?");
             return;
@@ -84,37 +86,38 @@ public class Widget extends AppWidgetProvider {
         }
     }
 
-    public static RemoteViews makeRemoteViews(Context context, int id, int action_index) {
-        Log.d(TAG, "Constructing widget " + id + " with action " + action_index);
-        
-        int keyCode = Configure.sKeyCode[action_index];
-        Intent intent = new Intent(Broadcaster.BROADCAST_MEDIA_BUTTON);
-        intent.setClass(context, Broadcaster.class);
-        // The URI is not the right fit for the keycode data, but the URI
-        // has to be unique so that PendingIntent doesn't override the intents
-        // we create for each keycode.
-        intent.setData(Uri.parse("http://" + keyCode));
-        PendingIntent pendingIntent = PendingIntent.getService(
-                context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-
-        RemoteViews views = new RemoteViews(context.getPackageName(),
-                R.layout.widget);
-        if (action_index == Configure.PLAY_PAUSE_ACTION) {
-            AudioManager audioManager = (AudioManager)
-                    context.getSystemService(Context.AUDIO_SERVICE);
-            setPlayPauseIcon(views, audioManager.isMusicActive());
-        } else {
-            views.setImageViewResource(R.id.button, Configure.sImageResource[action_index]);
+    public synchronized static RemoteViews makeRemoteViews(Context context, int action_index) {
+        if (sViews[action_index] == null) {
+            int keyCode = Configure.sKeyCode[action_index];
+            Intent intent = new Intent(Broadcaster.BROADCAST_MEDIA_BUTTON);
+            intent.setClass(context, Broadcaster.class);
+            // The URI is not the right fit for the keycode data, but the URI
+            // has to be unique so that PendingIntent doesn't override the intents
+            // we create for each keycode.
+            intent.setData(Uri.parse("http://" + keyCode));
+            PendingIntent pendingIntent = PendingIntent.getService(
+                    context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+    
+            RemoteViews views = new RemoteViews(context.getPackageName(),
+                    R.layout.widget);
+            if (action_index == Configure.PLAY_PAUSE_ACTION) {
+                AudioManager audioManager = (AudioManager)
+                        context.getSystemService(Context.AUDIO_SERVICE);
+                setPlayPauseIcon(views, audioManager.isMusicActive());
+            } else {
+                views.setImageViewResource(R.id.button, Configure.sImageResource[action_index]);
+            }
+            views.setOnClickPendingIntent(R.id.button, pendingIntent);
+            sViews[action_index] = views;
         }
-        views.setOnClickPendingIntent(R.id.button, pendingIntent);     
         
-        return views;
+        return sViews[action_index];
     }
     
 	public static void updateWidget(Context context, AppWidgetManager manager,
 			int id, int action_index) {
-	    Log.d(TAG, "Updating widget " + id);
-        manager.updateAppWidget(id, makeRemoteViews(context, id, action_index));
+	    Log.d(TAG, "Updating widget " + id + " with action " + action_index);
+        manager.updateAppWidget(id, makeRemoteViews(context, action_index));
 	}
 	
 	public static void setPlayPauseIcon(RemoteViews views, boolean isPlaying) {

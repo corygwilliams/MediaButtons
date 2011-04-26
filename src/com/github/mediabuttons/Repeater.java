@@ -25,7 +25,7 @@ public class Repeater extends BroadcastReceiver {
         filter.addAction(Intent.ACTION_SCREEN_ON);
         filter.addAction(Intent.ACTION_HEADSET_PLUG);
         sRepeater = new Repeater();
-        context.getApplicationContext().registerReceiver(sRepeater, filter);
+        context.registerReceiver(sRepeater, filter);
     }
     
     public static void stop(Context context) {
@@ -33,7 +33,7 @@ public class Repeater extends BroadcastReceiver {
             return;
         }
         Log.d(Widget.TAG, "Stopping repeater");
-        context.getApplicationContext().unregisterReceiver(sRepeater);
+        context.unregisterReceiver(sRepeater);
         sRepeater = null;
     }
 }

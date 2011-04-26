@@ -73,8 +73,6 @@ public class Configure extends ListActivity
 	public static String PREFS_NAME = "com.github.mediabuttons.prefs";
 	public static String ACTION_PREF_PREFIX = "widget_action";
 	
-	public static final int PLAY_PAUSE_ACTION = 0;
-	
 	public static int[] sKeyCode = new int[] {
 		KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE,
 		KeyEvent.KEYCODE_MEDIA_FAST_FORWARD,
@@ -82,6 +80,9 @@ public class Configure extends ListActivity
 		KeyEvent.KEYCODE_MEDIA_NEXT,
 		KeyEvent.KEYCODE_MEDIA_PREVIOUS,
 	};
+	
+    public static final int PLAY_PAUSE_ACTION = 0;
+    public static final int NUM_ACTIONS = sKeyCode.length;
 	
 	public static int[] sImageResource = new int[] {
 		R.drawable.play,  // Will be updated by handler.
