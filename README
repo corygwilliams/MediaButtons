@@ -1,3 +1,5 @@
 A simple android widget that sends the MEDIA_BUTTON intents normally used by
 bluetooth controls (AVCRP).  You can install it on the android market at
 https://market.android.com/details?id=com.github.mediabuttons
+
+Build by opening this project with Eclipse and building in there.
