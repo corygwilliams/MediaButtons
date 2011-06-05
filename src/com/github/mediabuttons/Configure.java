@@ -53,22 +53,11 @@ implements AdapterView.OnItemClickListener {
 
     public static final int PLAY_PAUSE_ACTION = 0;
     public static final int NUM_ACTIONS = sKeyCode.length;
-
-    /**
-     * The image resources to use for each media action.
-     */
-    public static int[] sImageResource = new int[] {
-        R.drawable.play,  // Will be updated by handler.
-        R.drawable.fastforward,
-        R.drawable.rewind,
-        R.drawable.next,
-        R.drawable.previous,
-    };
     
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Make sure we default to cancelled in case user hits back.
+        // Make sure we default to canceled in case user hits back.
         setResult(RESULT_CANCELED);
 
         mInstanceId = getIntent().getIntExtra(

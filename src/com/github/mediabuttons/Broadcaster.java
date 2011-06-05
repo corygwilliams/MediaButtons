@@ -156,7 +156,8 @@ public class Broadcaster extends IntentService {
         for (int id : widgetIds) {
             String pref_name = Configure.ACTION_PREF_PREFIX + id;
             int action_index = prefs.getInt(pref_name, -1);
-            if (action_index == Configure.PLAY_PAUSE_ACTION) {
+            if (action_index ==
+                Configure.PLAY_PAUSE_ACTION) {
                 mWidgetIds.add(id);
             }
         }
@@ -168,6 +169,7 @@ public class Broadcaster extends IntentService {
      * widgets as we see that state change.
      */
     private class UpdaterRunnable implements Runnable {
+        private Context mContext;
         private RemoteViews mView;
         private Boolean mMusicPlaying = null;
         private int mUpdateRepeat;
@@ -185,6 +187,7 @@ public class Broadcaster extends IntentService {
          */
         UpdaterRunnable(Context context, RemoteViews view,
                 ArrayList<Integer> widgetIds, int repeat) {
+            mContext = context;
             mView = view;
             mUpdateRepeat = repeat;
             mWidgetIds = widgetIds;
@@ -194,13 +197,15 @@ public class Broadcaster extends IntentService {
         }
 
         public void run() {
-            Log.d(Widget.TAG, "Play/pause handler called for " + mWidgetIds.size() + " widgets");
+            Log.d(Widget.TAG, "Play/pause handler called for " +
+                    mWidgetIds.size() + " widgets");
             boolean isActive = audioManager.isMusicActive();
             // Only bother with updating on the first pass or if the state changes.
             if (mMusicPlaying == null || mMusicPlaying != isActive) {
                 mMusicPlaying = isActive;
+                ButtonImageSource.getSource().setButtonIcon(mView,
+                        Configure.PLAY_PAUSE_ACTION, isActive);
                 for (int id: mWidgetIds) {
-                    Widget.setPlayPauseIcon(mView, isActive);
                     mManager.updateAppWidget(id, mView);
                 }
             }

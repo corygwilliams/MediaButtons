@@ -24,6 +24,7 @@ import android.appwidget.AppWidgetProvider;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.util.Log;
@@ -121,13 +122,13 @@ public class Widget extends AppWidgetProvider {
     
             RemoteViews views = new RemoteViews(context.getPackageName(),
                     R.layout.widget);
+            boolean isPlaying = false;
             if (action_index == Configure.PLAY_PAUSE_ACTION) {
                 AudioManager audioManager = (AudioManager)
                         context.getSystemService(Context.AUDIO_SERVICE);
-                setPlayPauseIcon(views, audioManager.isMusicActive());
-            } else {
-                views.setImageViewResource(R.id.button, Configure.sImageResource[action_index]);
+                isPlaying = audioManager.isMusicActive();
             }
+            ButtonImageSource.getSource().setButtonIcon(views, action_index, isPlaying);
             views.setOnClickPendingIntent(R.id.button, pendingIntent);
             sViews[action_index] = views;
         }
@@ -148,20 +149,5 @@ public class Widget extends AppWidgetProvider {
 			int id, int action_index) {
 	    Log.d(TAG, "Updating widget " + id + " with action " + action_index);
         manager.updateAppWidget(id, makeRemoteViews(context, action_index));
-	}
-	
-	/**
-	 * Choose the correct icon to use for the play/pause widget based on
-	 * whether music is playing right now.
-	 * 
-	 * @param views   The RemoteViews to set the icon for.
-	 * @param isPlaying   Whether or not music is playing.
-	 */
-	public static void setPlayPauseIcon(RemoteViews views, boolean isPlaying) {
-		if (isPlaying) {
-			views.setImageViewResource(R.id.button, R.drawable.pause);
-		} else {
-			views.setImageViewResource(R.id.button, R.drawable.play);
-		}
 	}
 }
