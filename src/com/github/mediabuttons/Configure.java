@@ -70,8 +70,7 @@ implements AdapterView.OnItemClickListener {
         // Hook the ListView up to the item text.
         String[] button_labels = getResources().getStringArray(
                 R.array.button_labels);
-        setListAdapter(new ArrayAdapter<String>(this, 
-                android.R.layout.simple_list_item_1, button_labels));
+        setListAdapter(new ConfigListAdaptor(this, button_labels));
 
         getListView().setOnItemClickListener(this);
     }
