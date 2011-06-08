@@ -3,5 +3,5 @@
 	xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/button" 
     android:layout_height="fill_parent" 
-    android:layout_width="fill_parent" android:background="@android:color/transparent" android:src="@drawable/empty_button">
+    android:layout_width="fill_parent" android:src="@drawable/empty_button" android:scaleType="fitCenter" android:background="@android:color/transparent" android:padding="4dp">
 </ImageButton>

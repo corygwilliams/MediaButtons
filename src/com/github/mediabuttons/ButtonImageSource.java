@@ -12,7 +12,8 @@ public abstract class ButtonImageSource {
     
     public static ButtonImageSource getSource() {
         if (sInstance == null) {
-            sInstance = new ResourceImageSource();
+            //sInstance = new ResourceImageSource();
+            sInstance = new ZipImageSource("/sdcard/Android/data/com.github.mediabuttons/files/test.zip");
         }
         return sInstance;
     }

@@ -10,9 +10,11 @@ import android.widget.RemoteViews;
 class ResourceImageSource extends ButtonImageSource {
     @Override
     void setButtonIcon(RemoteViews view, int actionIndex, boolean isPlaying) {
+        Log.i(Widget.TAG, "Setting icon");
         int resource = sImageResource[actionIndex];
         if (actionIndex == Configure.PLAY_PAUSE_ACTION && isPlaying) {
-            resource = sPauseImageResource;
+            Log.i(Widget.TAG, "Setting pause icon");
+           resource = sPauseImageResource;
         }
         view.setImageViewResource(R.id.button, resource);
     }

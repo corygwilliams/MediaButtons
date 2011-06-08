@@ -2,6 +2,7 @@ package com.github.mediabuttons;
 
 import android.content.Context;
 import android.database.DataSetObserver;
+import android.graphics.Bitmap;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,10 +15,15 @@ public class ConfigListAdaptor implements ListAdapter {
 
     private String[] mLabels;
     private Context mContext;
+    private int mPadding;
+    private int mIconSize;
 
     ConfigListAdaptor(Context context, String[] labels) {
         mContext = context;
         mLabels = labels;
+        final float scale = mContext.getResources().getDisplayMetrics().density;
+        mPadding = (int) (4 * scale + 0.5f);
+        mIconSize = (int) (64 * scale + 0.5f);
     }
     
     @Override
@@ -55,23 +61,34 @@ public class ConfigListAdaptor implements ListAdapter {
     public View getView(int position, View convertView, ViewGroup parent) {
         LinearLayout layout = new LinearLayout(mContext);
         layout.setGravity(Gravity.CENTER_VERTICAL);
-        layout.setPadding(5, 5, 5, 5);
-        ImageView image = new ImageView(mContext);
+        layout.setPadding(mPadding, mPadding, mPadding, mPadding);
+
         ButtonImageSource source = ButtonImageSource.getSource();
-        image.setImageBitmap(source.getIcon(mContext, position, false));
-        layout.addView(image);
+        Bitmap bitmap = source.getIcon(mContext, position, false);
+        layout.addView(makeImageView(bitmap));
+        
         if (position == Configure.PLAY_PAUSE_ACTION) {
-            image = new ImageView(mContext);
-            image.setImageBitmap(source.getIcon(mContext, position, true));
-            layout.addView(image);
+            bitmap = source.getIcon(mContext, position, true);
+            layout.addView(makeImageView(bitmap));
         }
+        
         TextView text = new TextView(mContext);
         text.setTextSize(24);
-        text.setPadding(5, 5, 5, 5);
+        text.setPadding(mPadding, mPadding, mPadding, mPadding);
         text.setText(mLabels[position]);
         layout.addView(text);
         
         return layout;
+    }
+    
+    private ImageView makeImageView(Bitmap icon) {
+        ImageView image = new ImageView(mContext);
+        image.setMaxWidth(mIconSize);
+        image.setMaxHeight(mIconSize);
+        image.setAdjustViewBounds(true);
+        image.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        image.setImageBitmap(icon);
+        return image;
     }
 
     @Override

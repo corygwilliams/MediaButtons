@@ -63,8 +63,10 @@ public class ZipImageSource extends ButtonImageSource {
 
     @Override
     void setButtonIcon(RemoteViews view, int actionIndex, boolean isPlaying) {
+        Log.i(Widget.TAG, "Setting icon (zip)");
         Bitmap bitmap = mBitmaps[actionIndex];
         if (actionIndex == Configure.PLAY_PAUSE_ACTION && isPlaying) {
+            Log.i(Widget.TAG, "Setting pause icon (zip)");
             bitmap = mPauseBitmap;
         }
         view.setImageViewBitmap(R.id.button, bitmap);
