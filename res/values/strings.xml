@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Media Buttons</string>
+    <string name="theme_button">Select Icon Theme</string>
     <string-array name="button_labels">
         <item>Play/Pause</item>
         <item>Fast Forward</item>

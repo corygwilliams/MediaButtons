@@ -18,6 +18,7 @@ package com.github.mediabuttons;
 
 import com.github.mediabuttons.R;
 
+import android.app.Activity;
 import android.app.ListActivity;
 import android.appwidget.AppWidgetManager;
 import android.content.Intent;
@@ -25,13 +26,16 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.AdapterView;
+import android.widget.FrameLayout;
+import android.widget.ListView;
 
 /**
  * Configure activity for creation of a new widget.  Lets the user choose
  * which media action (play/pause, next, rewind, etc.) the widget will perform.
  */
-public class Configure extends ListActivity
+public class Configure extends Activity 
 implements AdapterView.OnItemClickListener {
 
     private int mInstanceId;
@@ -71,15 +75,17 @@ implements AdapterView.OnItemClickListener {
             finish();
         }
 
+        setContentView(R.layout.configure);
         // Hook the ListView up to the item text.  Note that button labels is
         // only 6 long, while sKeyCode is 6 long because both versions of the
         // play/pause action are represented as a single selection in the
         // configuration list.
+        ListView view = 
+            ((ListView) findViewById(R.id.action_list));
         String[] button_labels = getResources().getStringArray(
                 R.array.button_labels);
-        setListAdapter(new ConfigListAdaptor(this, button_labels));
-
-        getListView().setOnItemClickListener(this);
+        view.setAdapter(new ConfigListAdaptor(this, button_labels));
+        view.setOnItemClickListener(this);
     }
 
     @Override
