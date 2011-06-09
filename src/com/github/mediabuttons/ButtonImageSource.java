@@ -7,8 +7,8 @@ import android.widget.RemoteViews;
 public abstract class ButtonImageSource {
     private static ButtonImageSource sInstance = null;
     
-    abstract void setButtonIcon(RemoteViews view, int action_index, boolean isPlaying);
-    abstract Bitmap getIcon(Context context, int action_index, boolean isPlaying);
+    abstract void setButtonIcon(RemoteViews view, int action_index);
+    abstract Bitmap getIcon(Context context, int action_index);
     
     public static ButtonImageSource getSource() {
         if (sInstance == null) {

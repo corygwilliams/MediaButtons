@@ -49,10 +49,15 @@ implements AdapterView.OnItemClickListener {
         KeyEvent.KEYCODE_MEDIA_REWIND,
         KeyEvent.KEYCODE_MEDIA_NEXT,
         KeyEvent.KEYCODE_MEDIA_PREVIOUS,
+        // This last event is for the pause version of the play/pause button.
+        // It does not show up in the config list.
+        KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE,
     };
 
     public static final int PLAY_PAUSE_ACTION = 0;
     public static final int NUM_ACTIONS = sKeyCode.length;
+    // This action is the version of the play/pause action with a pause icon.
+    public static final int PAUSE_PLAY_ACTION = NUM_ACTIONS - 1;
     
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -67,7 +72,10 @@ implements AdapterView.OnItemClickListener {
             finish();
         }
 
-        // Hook the ListView up to the item text.
+        // Hook the ListView up to the item text.  Note that button labels is
+        // only 6 long, while sKeyCode is 6 long because both versions of the
+        // play/pause action are represented as a single selection in the
+        // configuration list.
         String[] button_labels = getResources().getStringArray(
                 R.array.button_labels);
         setListAdapter(new ConfigListAdaptor(this, button_labels));

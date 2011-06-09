@@ -109,6 +109,13 @@ public class Widget extends AppWidgetProvider {
      * @return   A RemoteViews for the widget requested.
      */
     public synchronized static RemoteViews makeRemoteViews(Context context, int action_index) {
+        if (action_index == Configure.PLAY_PAUSE_ACTION) {
+            AudioManager audioManager = (AudioManager)
+                context.getSystemService(Context.AUDIO_SERVICE);
+            if (audioManager.isMusicActive()) {
+                action_index = Configure.PAUSE_PLAY_ACTION;
+            }
+        }
         if (sViews[action_index] == null) {
             int keyCode = Configure.sKeyCode[action_index];
             Intent intent = new Intent(Broadcaster.BROADCAST_MEDIA_BUTTON);
@@ -122,13 +129,7 @@ public class Widget extends AppWidgetProvider {
     
             RemoteViews views = new RemoteViews(context.getPackageName(),
                     R.layout.widget);
-            boolean isPlaying = false;
-            if (action_index == Configure.PLAY_PAUSE_ACTION) {
-                AudioManager audioManager = (AudioManager)
-                        context.getSystemService(Context.AUDIO_SERVICE);
-                isPlaying = audioManager.isMusicActive();
-            }
-            ButtonImageSource.getSource().setButtonIcon(views, action_index, isPlaying);
+            ButtonImageSource.getSource().setButtonIcon(views, action_index);
             views.setOnClickPendingIntent(R.id.button, pendingIntent);
             sViews[action_index] = views;
         }

@@ -18,8 +18,8 @@ public class ZipImageSource extends ButtonImageSource {
     Bitmap[] mBitmaps = new Bitmap[Configure.NUM_ACTIONS];
     Bitmap mPauseBitmap;
     
-    String[] sFilenames = { "play.png", "fastforward.png", "rewind.png", "next.png", "previous.png" };
-    String sPauseFilename = "pause.png";
+    String[] sFilenames = { "play.png", "fastforward.png", "rewind.png", "next.png", "previous.png",
+            "pause.png" };
     
     ZipImageSource(String source) {
         try {
@@ -29,20 +29,17 @@ public class ZipImageSource extends ButtonImageSource {
             while ((ze = zis.getNextEntry()) != null) {
                 String filename = ze.getName();
                 Bitmap bitmap = BitmapFactory.decodeStream(zis);
-                if (filename.equals(sPauseFilename)) {
-                    mPauseBitmap = bitmap;
-                } else {
-                    boolean found = false;
-                    for (int i = 0; i < mBitmaps.length; ++i) {
-                        if (filename.equals(sFilenames[i])) {
-                            mBitmaps[i] = bitmap;
-                            found = true;
-                            break;
-                        }
+                
+                boolean found = false;
+                for (int i = 0; i < mBitmaps.length; ++i) {
+                    if (filename.equals(sFilenames[i])) {
+                        mBitmaps[i] = bitmap;
+                        found = true;
+                        break;
                     }
-                    if (!found) {
-                        Log.e(Widget.TAG, "Didn't recognize filename " + filename);
-                    }
+                }
+                if (!found) {
+                    Log.e(Widget.TAG, "Didn't recognize filename " + filename);
                 }
             }
         } catch (FileNotFoundException e) {
@@ -53,23 +50,14 @@ public class ZipImageSource extends ButtonImageSource {
     }
     
     @Override
-    Bitmap getIcon(Context context, int actionIndex, boolean isPlaying) {
-        Bitmap bitmap = mBitmaps[actionIndex];
-        if (actionIndex == Configure.PLAY_PAUSE_ACTION && isPlaying) {
-            bitmap = mPauseBitmap;
-        }
-        return bitmap;
+    Bitmap getIcon(Context context, int actionIndex) {
+        return mBitmaps[actionIndex];
     }
 
     @Override
-    void setButtonIcon(RemoteViews view, int actionIndex, boolean isPlaying) {
+    void setButtonIcon(RemoteViews view, int actionIndex) {
         Log.i(Widget.TAG, "Setting icon (zip)");
-        Bitmap bitmap = mBitmaps[actionIndex];
-        if (actionIndex == Configure.PLAY_PAUSE_ACTION && isPlaying) {
-            Log.i(Widget.TAG, "Setting pause icon (zip)");
-            bitmap = mPauseBitmap;
-        }
-        view.setImageViewBitmap(R.id.button, bitmap);
+        view.setImageViewBitmap(R.id.button, mBitmaps[actionIndex]);
     }
 
 }

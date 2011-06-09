@@ -124,13 +124,11 @@ public class Broadcaster extends IntentService {
      * @param repeat   How many times to repeat the update.
      */
     private void startUpdater(int repeat) {
-        RemoteViews view = Widget.makeRemoteViews(
-                this, Configure.PLAY_PAUSE_ACTION);
         if (mWidgetIds == null) {
             updateWidgetIds();
         }
         UpdaterRunnable updater = new UpdaterRunnable(
-                this, view, mWidgetIds, repeat);
+                this, mWidgetIds, repeat);
         if (mUpdateButton != null) {
             mHandler.removeCallbacks(mUpdateButton);
         }
@@ -170,7 +168,6 @@ public class Broadcaster extends IntentService {
      */
     private class UpdaterRunnable implements Runnable {
         private Context mContext;
-        private RemoteViews mView;
         private Boolean mMusicPlaying = null;
         private int mUpdateRepeat;
         private ArrayList<Integer> mWidgetIds;
@@ -185,10 +182,9 @@ public class Broadcaster extends IntentService {
          * @param widgetIds   The widgetIds to update.
          * @param repeat   The number of times to reschedule this runnable.
          */
-        UpdaterRunnable(Context context, RemoteViews view,
-                ArrayList<Integer> widgetIds, int repeat) {
+        UpdaterRunnable(Context context, ArrayList<Integer> widgetIds,
+                int repeat) {
             mContext = context;
-            mView = view;
             mUpdateRepeat = repeat;
             mWidgetIds = widgetIds;
             mManager = AppWidgetManager.getInstance(context);
@@ -203,10 +199,10 @@ public class Broadcaster extends IntentService {
             // Only bother with updating on the first pass or if the state changes.
             if (mMusicPlaying == null || mMusicPlaying != isActive) {
                 mMusicPlaying = isActive;
-                ButtonImageSource.getSource().setButtonIcon(mView,
-                        Configure.PLAY_PAUSE_ACTION, isActive);
+                RemoteViews view = Widget.makeRemoteViews(
+                        mContext, Configure.PLAY_PAUSE_ACTION);
                 for (int id: mWidgetIds) {
-                    mManager.updateAppWidget(id, mView);
+                    mManager.updateAppWidget(id, view);
                 }
             }
             if (--mUpdateRepeat > 0) {

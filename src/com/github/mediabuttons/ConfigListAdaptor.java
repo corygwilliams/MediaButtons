@@ -64,11 +64,11 @@ public class ConfigListAdaptor implements ListAdapter {
         layout.setPadding(mPadding, mPadding, mPadding, mPadding);
 
         ButtonImageSource source = ButtonImageSource.getSource();
-        Bitmap bitmap = source.getIcon(mContext, position, false);
+        Bitmap bitmap = source.getIcon(mContext, position);
         layout.addView(makeImageView(bitmap));
         
         if (position == Configure.PLAY_PAUSE_ACTION) {
-            bitmap = source.getIcon(mContext, position, true);
+            bitmap = source.getIcon(mContext, Configure.PAUSE_PLAY_ACTION);
             layout.addView(makeImageView(bitmap));
         }
         
