@@ -19,7 +19,6 @@ package com.github.mediabuttons;
 import com.github.mediabuttons.R;
 
 import android.app.Activity;
-import android.app.ListActivity;
 import android.appwidget.AppWidgetManager;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -28,7 +27,7 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
-import android.widget.FrameLayout;
+import android.widget.Button;
 import android.widget.ListView;
 
 /**
@@ -76,16 +75,30 @@ implements AdapterView.OnItemClickListener {
         }
 
         setContentView(R.layout.configure);
+        ListView view = ((ListView) findViewById(R.id.action_list));
+        view.setOnItemClickListener(this);
+        
+        // Hook up the theme button to launch the ThemeConfigure activity.
+        Button theme_button = ((Button) findViewById(R.id.theme_button));
+        theme_button.setOnClickListener(new OnClickListener() {
+			public void onClick(View view) {
+				startActivity(new Intent(
+						Configure.this, ThemeConfigure.class));
+			}
+        });
+    }
+    
+    public void onStart()  {
         // Hook the ListView up to the item text.  Note that button labels is
         // only 6 long, while sKeyCode is 6 long because both versions of the
         // play/pause action are represented as a single selection in the
         // configuration list.
-        ListView view = 
-            ((ListView) findViewById(R.id.action_list));
+    	// We do this in onStart so that we reset the ListView icons each time
+    	// when we return from the ThemeConfigure activity.
+    	ListView view =((ListView) findViewById(R.id.action_list));
         String[] button_labels = getResources().getStringArray(
                 R.array.button_labels);
         view.setAdapter(new ConfigListAdaptor(this, button_labels));
-        view.setOnItemClickListener(this);
     }
 
     @Override

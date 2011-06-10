@@ -63,7 +63,7 @@ public class ConfigListAdaptor implements ListAdapter {
         layout.setGravity(Gravity.CENTER_VERTICAL);
         layout.setPadding(mPadding, mPadding, mPadding, mPadding);
 
-        ButtonImageSource source = ButtonImageSource.getSource();
+        ButtonImageSource source = ButtonImageSource.getSource(mContext);
         Bitmap bitmap = source.getIcon(mContext, position);
         layout.addView(makeImageView(bitmap));
         
