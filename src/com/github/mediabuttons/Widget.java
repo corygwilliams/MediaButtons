@@ -21,6 +21,7 @@ import com.github.mediabuttons.R;
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -134,6 +135,14 @@ public class Widget extends AppWidgetProvider {
         }
         
         return sViews[action_index];
+    }
+    
+    public synchronized static void invalidateAllWidgets(Context context) {
+        sViews = new RemoteViews[Configure.NUM_ACTIONS];
+        AppWidgetManager manager = AppWidgetManager.getInstance(context);
+        ComponentName component = new ComponentName(context, Widget.class);
+        int[] widgetIds = manager.getAppWidgetIds(component);
+        new Widget().onUpdate(context, manager, widgetIds);
     }
     
     /**

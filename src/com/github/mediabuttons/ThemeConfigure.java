@@ -30,6 +30,7 @@ implements AdapterView.OnItemClickListener {
         prefs.putString(THEME_PREF_NAME, mAdaptor.getThemeId(position));
         prefs.commit();
         ButtonImageSource.invalidateSource();
+        Widget.invalidateAllWidgets(this);
         // TODO redraw all widgets.
 
         //Intent resultValue = new Intent();

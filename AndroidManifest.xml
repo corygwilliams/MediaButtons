@@ -11,6 +11,7 @@
 		        <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
 		    </intent-filter>
 		</activity>
+		<activity android:name=".ThemeConfigure" ></activity>
 	    <receiver android:name=".Widget" >
 		    <intent-filter>
 		        <action android:name="android.appwidget.action.APPWIDGET_UPDATE" /> />

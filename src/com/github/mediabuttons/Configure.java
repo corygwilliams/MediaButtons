@@ -88,7 +88,9 @@ implements AdapterView.OnItemClickListener {
         });
     }
     
+    @Override
     public void onStart()  {
+        super.onStart();
         // Hook the ListView up to the item text.  Note that button labels is
         // only 6 long, while sKeyCode is 6 long because both versions of the
         // play/pause action are represented as a single selection in the

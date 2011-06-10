@@ -18,16 +18,18 @@ public class ThemeListAdaptor implements ListAdapter {
     private String[] mThemeIds;
     
     public ThemeListAdaptor(Context context) {
+        super();
         mContext = context;
         File base_dir = Environment.getExternalStorageDirectory();
         File theme_dir = new File(base_dir, 
-        		"Android/data/com.github.mediabuttons/themes");
+        		"Android/data/com.github.mediabuttons/files");
         theme_dir.mkdirs();
-        String[] zip_files = theme_dir.list(new FilenameFilter() {
-			public boolean accept(File dir, String filename) {
-				return filename.endsWith(".zip");
-			}
-        });
+//        String[] zip_files = theme_dir.list(new FilenameFilter() {
+//			public boolean accept(File dir, String filename) {
+//				return filename.endsWith(".zip");
+//			}
+//        });
+        String[] zip_files = theme_dir.list();
         
         mLabels = new String[zip_files.length + 1];
         mThemeIds = new String[zip_files.length + 1];

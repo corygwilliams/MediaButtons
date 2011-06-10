@@ -16,7 +16,7 @@ public abstract class ButtonImageSource {
         	SharedPreferences prefs =
             	context.getSharedPreferences(Configure.PREFS_NAME, 0);
             String themeId = prefs.getString(
-            		ThemeConfigure.THEME_PREF_NAME, "");
+            		ThemeConfigure.THEME_PREF_NAME, "default");
             if (themeId == "default") {
             	sInstance = new ResourceImageSource();
             } else {
