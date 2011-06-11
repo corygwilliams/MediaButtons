@@ -25,20 +25,20 @@ class ResourceImageSource extends ButtonImageSource {
      * The image resources to use for each media action.
      */
     private static int[] sImageResource = new int[] {
-        R.drawable.play,
-        R.drawable.fastforward,
-        R.drawable.rewind,
-        R.drawable.next,
-        R.drawable.previous,
-        R.drawable.pause,
+        R.drawable.black_play,
+        R.drawable.black_fastforward,
+        R.drawable.black_rewind,
+        R.drawable.black_next,
+        R.drawable.black_previous,
+        R.drawable.black_pause,
     };
     
     private static int[] sBitmapResource = new int[] {
-        R.drawable.play_normal,
-        R.drawable.fastforward_normal,
-        R.drawable.rewind_normal,
-        R.drawable.next_normal,
-        R.drawable.previous_normal,
-        R.drawable.pause_normal,
+        R.drawable.black_play_normal,
+        R.drawable.black_fastforward_normal,
+        R.drawable.black_rewind_normal,
+        R.drawable.black_next_normal,
+        R.drawable.black_previous_normal,
+        R.drawable.black_pause_normal,
     };
 }
