@@ -17,10 +17,10 @@ public abstract class ButtonImageSource {
             	context.getSharedPreferences(Configure.PREFS_NAME, 0);
             String themeId = prefs.getString(
             		ThemeConfigure.THEME_PREF_NAME, "default");
-            if (themeId == "default") {
-            	sInstance = new ResourceImageSource();
+            if (themeId.endsWith(".zip")) {
+                sInstance = new ZipImageSource(themeId);
             } else {
-            	sInstance = new ZipImageSource(themeId);
+                sInstance = new ResourceImageSource("Silver");
             }
         }
         return sInstance;
