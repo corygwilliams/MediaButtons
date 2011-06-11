@@ -2,6 +2,7 @@
 <resources>
     <string name="app_name">Media Buttons</string>
     <string name="theme_button">Select Icon Theme</string>
+    <string name="theme_error">Invalid theme for Media Buttons.  Reverting to default \'Black\' theme.</string>
     <string-array name="button_labels">
         <item>Play/Pause</item>
         <item>Fast Forward</item>

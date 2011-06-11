@@ -57,7 +57,11 @@ class ResourceImageSource extends ButtonImageSource {
     private int[] mImages;
     private int[] mBitmaps;
     
-    ResourceImageSource(String themeId) {
+    ResourceImageSource(String themeId) throws InvalidTheme {
+        if (!sAllImages.containsKey(themeId)) {
+            Log.e(Widget.TAG, "Invalid resource theme id: " + themeId);
+            throw new InvalidTheme();
+        }
         mImages = sAllImages.get(themeId);
         mBitmaps = sAllBitmaps.get(themeId);
     }

@@ -20,8 +20,8 @@ public class ZipImageSource extends ButtonImageSource {
     Bitmap[] mBitmaps = new Bitmap[Configure.NUM_ACTIONS];
     Bitmap mPauseBitmap;
     
-    String[] sFilenames = { "play.png", "fastforward.png", "rewind.png", "next.png", "previous.png",
-            "pause.png" };
+    static String[] sFilenames = { "play.png", "fastforward.png",
+        "rewind.png", "next.png", "previous.png", "pause.png" };
     
     static void appendToThemeList(Vector<ThemeId> themes) {
         File base_dir = Environment.getExternalStorageDirectory();
@@ -45,7 +45,7 @@ public class ZipImageSource extends ButtonImageSource {
         }
     }
     
-    ZipImageSource(String source) {
+    ZipImageSource(String source) throws InvalidTheme {
         try {
             FileInputStream is = new FileInputStream(new File(source));
             ZipInputStream zis = new ZipInputStream(new BufferedInputStream(is));
@@ -66,10 +66,23 @@ public class ZipImageSource extends ButtonImageSource {
                     Log.e(Widget.TAG, "Didn't recognize filename " + filename);
                 }
             }
+            boolean valid = true;
+            for (int i = 0; i < mBitmaps.length; ++i) {
+                if (mBitmaps[i] == null) {
+                    Log.e(Widget.TAG, "Zip missing " + sFilenames[i]);
+                    valid = false;
+                }
+            }
+            if (!valid) {
+                Log.e(Widget.TAG, "Error found in zip theme " + source);
+                throw new InvalidTheme();
+            }
         } catch (FileNotFoundException e) {
             Log.e(Widget.TAG, "Failed to find file " + source);
+            throw new InvalidTheme();
         } catch (IOException e) {
             Log.e(Widget.TAG, "Error while reading " + source);
+            throw new InvalidTheme();
         }
     }
     
