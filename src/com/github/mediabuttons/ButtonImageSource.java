@@ -1,5 +1,7 @@
 package com.github.mediabuttons;
 
+import java.util.Vector;
+
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
@@ -20,10 +22,15 @@ public abstract class ButtonImageSource {
             if (themeId.endsWith(".zip")) {
                 sInstance = new ZipImageSource(themeId);
             } else {
-                sInstance = new ResourceImageSource("Silver");
+                sInstance = new ResourceImageSource(themeId);
             }
         }
         return sInstance;
+    }
+    
+    static void appendToThemeList(Vector<ThemeId> themes) {
+        ResourceImageSource.appendToThemeList(themes);
+        ZipImageSource.appendToThemeList(themes);
     }
     
     public static void invalidateSource() {

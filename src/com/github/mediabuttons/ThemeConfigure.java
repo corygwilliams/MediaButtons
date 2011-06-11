@@ -31,7 +31,6 @@ implements AdapterView.OnItemClickListener {
         prefs.commit();
         ButtonImageSource.invalidateSource();
         Widget.invalidateAllWidgets(this);
-        // TODO redraw all widgets.
 
         //Intent resultValue = new Intent();
         //setResult(RESULT_OK, resultValue);

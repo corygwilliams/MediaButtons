@@ -2,6 +2,7 @@ package com.github.mediabuttons;
 
 import java.io.File;
 import java.io.FilenameFilter;
+import java.util.Vector;
 
 import android.content.Context;
 import android.database.DataSetObserver;
@@ -14,33 +15,12 @@ import android.widget.TextView;
 public class ThemeListAdaptor implements ListAdapter {
 
     private Context mContext;
-    private String[] mLabels;
-    private String[] mThemeIds;
+    private Vector<ThemeId> mThemes = new Vector<ThemeId>();
     
     public ThemeListAdaptor(Context context) {
         super();
         mContext = context;
-        File base_dir = Environment.getExternalStorageDirectory();
-        File theme_dir = new File(base_dir, 
-        		"Android/data/com.github.mediabuttons/files");
-        theme_dir.mkdirs();
-//        String[] zip_files = theme_dir.list(new FilenameFilter() {
-//			public boolean accept(File dir, String filename) {
-//				return filename.endsWith(".zip");
-//			}
-//        });
-        String[] zip_files = theme_dir.list();
-        
-        mLabels = new String[zip_files.length + 1];
-        mThemeIds = new String[zip_files.length + 1];
-        
-        mLabels[0] = "Default";
-        mThemeIds[0] = "default";
-        for (int i = 0; i < zip_files.length; ++i) {
-        	String name = zip_files[i];
-        	mLabels[i + 1] = name.substring(0, name.length() - 4);
-        	mThemeIds[i + 1] = theme_dir.getPath() + "/" + name;
-        }
+        ButtonImageSource.appendToThemeList(mThemes);
     }
     
     @Override
@@ -55,7 +35,7 @@ public class ThemeListAdaptor implements ListAdapter {
 
     @Override
     public int getCount() {
-        return mLabels.length;
+        return mThemes.size();
     }
 
     @Override
@@ -64,7 +44,7 @@ public class ThemeListAdaptor implements ListAdapter {
     }
     
     public String getThemeId(int position) {
-    	return mThemeIds[position];
+    	return mThemes.get(position).id;
     }
 
     @Override
@@ -83,7 +63,7 @@ public class ThemeListAdaptor implements ListAdapter {
     	if (text == null) {
     		text = new TextView(mContext);
     	}
-    	text.setText(mLabels[position]);
+    	text.setText(mThemes.get(position).label);
     	text.setTextSize(24);
     	return text;
     }

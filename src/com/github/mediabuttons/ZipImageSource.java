@@ -5,12 +5,14 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Vector;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.Environment;
 import android.util.Log;
 import android.widget.RemoteViews;
 
@@ -20,6 +22,28 @@ public class ZipImageSource extends ButtonImageSource {
     
     String[] sFilenames = { "play.png", "fastforward.png", "rewind.png", "next.png", "previous.png",
             "pause.png" };
+    
+    static void appendToThemeList(Vector<ThemeId> themes) {
+        File base_dir = Environment.getExternalStorageDirectory();
+        File theme_dir = new File(base_dir, 
+                "Android/data/com.github.mediabuttons/files");
+        theme_dir.mkdirs();
+//        String[] zip_files = theme_dir.list(new FilenameFilter() {
+//          public boolean accept(File dir, String filename) {
+//              return filename.endsWith(".zip");
+//          }
+//        });
+        String[] zip_files = theme_dir.list();
+        
+        themes.ensureCapacity(themes.size() + zip_files.length);
+        
+        for (int i = 0; i < zip_files.length; ++i) {
+            String name = zip_files[i];
+            ThemeId theme = new ThemeId(name.substring(0, name.length() - 4),
+                    theme_dir.getPath() + "/" + name);
+            themes.add(theme);
+        }
+    }
     
     ZipImageSource(String source) {
         try {

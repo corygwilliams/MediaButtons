@@ -1,6 +1,7 @@
 package com.github.mediabuttons;
 
 import java.util.HashMap;
+import java.util.Vector;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -80,5 +81,9 @@ class ResourceImageSource extends ButtonImageSource {
         sAllImages.put("Silver", sSilverImageResource);
         sAllBitmaps.put("Silver", sSilverBitmapResource);
     }
- 
+
+    static void appendToThemeList(Vector<ThemeId> themes) {
+        themes.add(new ThemeId("Black", "Black"));
+        themes.add(new ThemeId("Silver", "Silver"));
+    }
 }
