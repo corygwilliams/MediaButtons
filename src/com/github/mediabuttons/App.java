@@ -17,15 +17,27 @@
 package com.github.mediabuttons;
 
 import android.app.Application;
+import android.content.Context;
 
 /**
  * We override Application so that we can start the Repeater when the process
  * is restarted.  We can't use static initializer since we need a Context.
  */
 public class App extends Application {
+    private static App sInstance;
+    
     @Override
     public void onCreate() {
         super.onCreate();
         Repeater.start(getApplicationContext());
     }
+    
+    public App() {
+        sInstance = this;
+    }
+
+    public static Context getContext() {
+        return sInstance;
+    }
+
 }
