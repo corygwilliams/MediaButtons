@@ -22,11 +22,7 @@ public abstract class ButtonImageSource {
             String themeId = prefs.getString(
             		ThemeConfigure.THEME_PREF_NAME, "Black");
             try {
-                if (themeId.endsWith(".zip")) {
-                    sInstance = new ZipImageSource(themeId);
-                } else {
-                    sInstance = new ResourceImageSource(themeId);
-                }
+                sInstance = ButtonImageSource.createSource(themeId);
             } catch (InvalidTheme e) { 
                 Log.e(Widget.TAG, "Reverting to default theme");
                 // Update Prefs.
@@ -46,7 +42,15 @@ public abstract class ButtonImageSource {
         return sInstance;
     }
     
-    static void appendToThemeList(Vector<ThemeId> themes) {
+    public static ButtonImageSource createSource(String themeId) throws InvalidTheme {
+        if (themeId.endsWith(".zip")) {
+            return new ZipImageSource(themeId);
+        } else {
+            return new ResourceImageSource(themeId);
+        }
+    }
+    
+    public static void appendToThemeList(Vector<ThemeId> themes) {
         ResourceImageSource.appendToThemeList(themes);
         ZipImageSource.appendToThemeList(themes);
     }

@@ -61,7 +61,6 @@ public class ConfigListAdaptor implements ListAdapter {
     public View getView(int position, View convertView, ViewGroup parent) {
         LinearLayout layout = new LinearLayout(mContext);
         layout.setGravity(Gravity.CENTER_VERTICAL);
-        layout.setPadding(mPadding, mPadding, mPadding, mPadding);
 
         ButtonImageSource source = ButtonImageSource.getSource(mContext);
         Bitmap bitmap = source.getIcon(mContext, position);
@@ -88,6 +87,7 @@ public class ConfigListAdaptor implements ListAdapter {
         image.setAdjustViewBounds(true);
         image.setScaleType(ImageView.ScaleType.FIT_CENTER);
         image.setImageBitmap(icon);
+        image.setPadding(mPadding, mPadding, mPadding, mPadding);
         return image;
     }
 

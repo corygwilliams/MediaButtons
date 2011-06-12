@@ -86,7 +86,7 @@ class ResourceImageSource extends ButtonImageSource {
         sAllBitmaps.put("Silver", sSilverBitmapResource);
     }
 
-    static void appendToThemeList(Vector<ThemeId> themes) {
+    public static void appendToThemeList(Vector<ThemeId> themes) {
         themes.add(new ThemeId("Black", "Black"));
         themes.add(new ThemeId("Silver", "Silver"));
     }

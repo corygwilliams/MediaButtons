@@ -23,7 +23,7 @@ public class ZipImageSource extends ButtonImageSource {
     static String[] sFilenames = { "play.png", "fastforward.png",
         "rewind.png", "next.png", "previous.png", "pause.png" };
     
-    static void appendToThemeList(Vector<ThemeId> themes) {
+    public static void appendToThemeList(Vector<ThemeId> themes) {
         File base_dir = Environment.getExternalStorageDirectory();
         File theme_dir = new File(base_dir, 
                 "Android/data/com.github.mediabuttons/files");
