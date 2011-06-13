@@ -1,4 +1,4 @@
-MediaButtons supports theme that allow you to customize the images used for all
+MediaButtons supports themes that allow you to customize the images used for all
 the widgets.  There are two types, builtin and zip.  The builtin themes are what
 comes with MediaButtons by default.  Zip themes can be created and added by the
 end users.
@@ -7,23 +7,26 @@ Zip themes for MediaButtons are simply a zip file with images for each type of
 media action (play, pause, next, etc.).  They must be placed in the external
 data directory (usually an sdcard) under
 "Android/data/com.github.mediabuttons/themes/" in a file that ends in ".zip".
-Once placed there, the theme should appear in the theme configuration under the
+Once placed there, the theme should appear in the theme configuration with the
 name of your zip file.
 
 If you want to create your own zip theme, you should create 6 .png images (one
 for each action: play.png, pause.png, next.png, previous.png, fastforward.png,
-rewind.png).  There are now size restrictions on images, but I recommend 256x256
+rewind.png).  There are no size restrictions on images, but I recommend 256x256
 (the size used for built in themes).  Zip up these 6 files and place the zip in
 the themes directory.  Your theme should now appear in the theme selection
 screen.  If your theme appears but says "(Invalid Theme)", can you check the
-system log for mediabutton error that describe what was invalid about your zip
+system log for mediabutton errors that describe what was invalid about your zip
 theme.  There are examples in this directory under "black_example.zip" and
 "silver_example.zip".
 
 One limitation of zip themes is that the widget images will be static and they
-won't have any animation when the button is pressed.  This is a limitation of
-the android API for widgets and the animation requires the use of resources
-built into the app.  If you create a really nice theme or one that matches an
-existing theme for custom roms, you can contact me about getting it included
-wiht the app so that you can add the press animation to the theme (and sharing
-it with others).
+won't have any highlight animation when the button is pressed.  This is a
+limitation of the android API for widgets and the animation requires the use of
+resources built into the app.  This doesn't apply to the play/pause switch;
+this will still happen automatically for zip themes.  If you create a really
+nice theme or one that matches an existing theme for custom roms, you can
+contact me about getting it included with the app so that you can add the press
+animation to the theme (and sharing it with others).  Which themes get added to
+the official app is at my discretion, but I will generally to try to
+accommodating.
