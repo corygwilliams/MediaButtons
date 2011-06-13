@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2011 Cory Williams
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.github.mediabuttons;
 
 import java.util.Vector;
@@ -15,6 +31,11 @@ import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
+/**
+ * Creates the list elements for the theme list.  The list is static (but may
+ * change each time we open the theme config).  All elements are enabled.
+ * Each element represents one theme.
+ */
 public class ThemeListAdaptor implements ListAdapter {
 
     private Context mContext;
@@ -25,7 +46,9 @@ public class ThemeListAdaptor implements ListAdapter {
     public ThemeListAdaptor(Context context) {
         super();
         mContext = context;
+        // Ask for all themes to display.
         ButtonImageSource.appendToThemeList(mThemes);
+        // Convert from dp to px.
         final float scale = mContext.getResources().getDisplayMetrics().density;
         mPadding = (int) (2 * scale + 0.5f);
         mIconSize = (int) (32 * scale + 0.5f);
@@ -65,6 +88,9 @@ public class ThemeListAdaptor implements ListAdapter {
         return 0;
     }
 
+    /**
+     * Each item has all six icons in a 3x2 grid and then the text label.
+     */
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         LinearLayout layout = new LinearLayout(mContext);
@@ -76,12 +102,12 @@ public class ThemeListAdaptor implements ListAdapter {
     	    TableLayout table = new TableLayout(mContext);
     	    TableRow row1 = new TableRow(mContext);
     	    for (int i = 0; i < Configure.NUM_ACTIONS / 2; ++i) {
-    	        row1.addView(makeImageView(source.getIcon(mContext, i)));
+    	        row1.addView(makeImageView(source.getIcon(i)));
     	    }
     	    table.addView(row1);
     	    TableRow row2 = new TableRow(mContext);
             for (int i = Configure.NUM_ACTIONS / 2; i < Configure.NUM_ACTIONS; ++i) {
-                row2.addView(makeImageView(source.getIcon(mContext, i)));
+                row2.addView(makeImageView(source.getIcon(i)));
             }
             table.addView(row2);
             layout.addView(table);
@@ -97,6 +123,9 @@ public class ThemeListAdaptor implements ListAdapter {
     	return layout;
     }
         
+    /**
+     * Creates an ImageView for the given bitmap.
+     */
     private ImageView makeImageView(Bitmap icon) {
         ImageView image = new ImageView(mContext);
         image.setMaxWidth(mIconSize);

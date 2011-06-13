@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2011 Cory Williams
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.github.mediabuttons;
 
 import java.io.BufferedInputStream;
@@ -18,6 +34,15 @@ import android.os.Environment;
 import android.util.Log;
 import android.widget.RemoteViews;
 
+/**
+ * This class represents a theme that comes from a zip file.  Such
+ * themes need not be registered and may change during the lifetime of the
+ * widget process.  All such themes need to be found in the external
+ * storage directory under "Android/data/com.github.mediabuttons/themes".
+ * 
+ * For more details on structure of zip themes or how to use them, see
+ * doc/zip_themes.txt
+ */
 public class ZipImageSource extends ButtonImageSource {
     public static final String CACHED_ZIP_FILE = "cached_theme.zip";
     
@@ -27,6 +52,12 @@ public class ZipImageSource extends ButtonImageSource {
     static String[] sFilenames = { "play.png", "fastforward.png",
         "rewind.png", "next.png", "previous.png", "pause.png" };
     
+    /**
+     * Read through the themes directory to find all *.zip files.  We do not
+     * do any further validation of the theme files.
+     * 
+     * @param themes  The vector to append themes to.
+     */
     public static void appendToThemeList(Vector<ThemeId> themes) {
         File base_dir = Environment.getExternalStorageDirectory();
         File theme_dir = new File(base_dir,
@@ -51,6 +82,14 @@ public class ZipImageSource extends ButtonImageSource {
         }
     }
     
+    /**
+     * Copy the given zip file to the internal phone storage.  Only one file
+     * can be cached this way at a time.
+     * 
+     * @param source   The source zip file to copy to the cache.
+     * @return  Returns the new theme id string to use if the caching succeeds.
+     *     Returns null if it fails.
+     */
     public static String cacheZipTheme(String source) {
         try {
             FileChannel in_channel = new FileInputStream(new File(source)).getChannel();
@@ -66,19 +105,32 @@ public class ZipImageSource extends ButtonImageSource {
         return null;
     }
     
-    ZipImageSource(String source) throws InvalidTheme {
+    /**
+     * Constructs a source from the given zip file theme.
+     * 
+     * @param themeId   Either the theme id returned by cacheZipTheme, or
+     *      the path to a zip file containing a theme.
+     * @throws InvalidTheme   If the zip file doesn't exist or doesn't 
+     *      contain the needed data.
+     */
+    ZipImageSource(String themeId) throws InvalidTheme {
         try {
             FileInputStream is;
-            if (source.equals(CACHED_ZIP_FILE)) {
-                is = App.getContext().openFileInput(source);
+            if (themeId.equals(CACHED_ZIP_FILE)) {
+                is = App.getContext().openFileInput(themeId);
             } else {
-                is = new FileInputStream(new File(source));
+                is = new FileInputStream(new File(themeId));
             }
             ZipInputStream zis = new ZipInputStream(new BufferedInputStream(is));
             ZipEntry ze;
             while ((ze = zis.getNextEntry()) != null) {
                 String filename = ze.getName();
                 Bitmap bitmap = BitmapFactory.decodeStream(zis);
+                if (bitmap == null) {
+                    Log.e(Widget.TAG, "Couldn't decode image in " + filename +
+                            " for theme " + themeId);
+                    continue;
+                }
                 
                 boolean found = false;
                 for (int i = 0; i < mBitmaps.length; ++i) {
@@ -89,9 +141,11 @@ public class ZipImageSource extends ButtonImageSource {
                     }
                 }
                 if (!found) {
-                    Log.e(Widget.TAG, "Didn't recognize filename " + filename);
+                    Log.e(Widget.TAG, "Didn't recognize filename " +
+                            filename + " found in " + themeId);
                 }
             }
+            // Validate that we found all the files we need.
             boolean valid = true;
             for (int i = 0; i < mBitmaps.length; ++i) {
                 if (mBitmaps[i] == null) {
@@ -100,20 +154,20 @@ public class ZipImageSource extends ButtonImageSource {
                 }
             }
             if (!valid) {
-                Log.e(Widget.TAG, "Error found in zip theme " + source);
+                Log.e(Widget.TAG, "Error found in zip theme " + themeId);
                 throw new InvalidTheme();
             }
         } catch (FileNotFoundException e) {
-            Log.e(Widget.TAG, "Failed to find file " + source);
+            Log.e(Widget.TAG, "Failed to find file " + themeId);
             throw new InvalidTheme();
         } catch (IOException e) {
-            Log.e(Widget.TAG, "Error while reading " + source);
+            Log.e(Widget.TAG, "Error while reading " + themeId);
             throw new InvalidTheme();
         }
     }
     
     @Override
-    Bitmap getIcon(Context context, int actionIndex) {
+    Bitmap getIcon(int actionIndex) {
         return mBitmaps[actionIndex];
     }
 

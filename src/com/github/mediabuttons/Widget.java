@@ -129,7 +129,7 @@ public class Widget extends AppWidgetProvider {
     
             RemoteViews views = new RemoteViews(context.getPackageName(),
                     R.layout.widget);
-            ButtonImageSource.getSource(context).setButtonIcon(views, action_index);
+            ButtonImageSource.getSource().setButtonIcon(views, action_index);
             views.setOnClickPendingIntent(R.id.button, pendingIntent);
             sViews[action_index] = views;
         }
