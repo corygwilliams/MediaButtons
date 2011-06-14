@@ -12,7 +12,7 @@ name of your zip file.
 
 If you want to create your own zip theme, you should create 6 .png images (one
 for each action: play.png, pause.png, next.png, previous.png, fastforward.png,
-rewind.png).  There are no size restrictions on images, but I recommend 256x256
+rewind.png).  There are no size restrictions on images, but I recommend 128x128
 (the size used for built in themes).  Zip up these 6 files and place the zip in
 the themes directory.  Your theme should now appear in the theme selection
 screen.  If your theme appears but says "(Invalid Theme)", can you check the
