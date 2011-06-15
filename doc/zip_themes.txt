@@ -22,11 +22,11 @@ theme.  There are examples in this directory under "black_example.zip" and
 
 One limitation of zip themes is that the widget images will be static and they
 won't have any highlight animation when the button is pressed.  This is a
-limitation of the android API for widgets and the animation requires the use of
+limitation of the android API for widgets.  The animation requires the use of
 resources built into the app.  This doesn't apply to the play/pause switch;
 this will still happen automatically for zip themes.  If you create a really
 nice theme or one that matches an existing theme for custom roms, you can
 contact me about getting it included with the app so that you can add the press
 animation to the theme (and sharing it with others).  Which themes get added to
-the official app is at my discretion, but I will generally to try to
+the official app is at my discretion, but I will generally try to be
 accommodating.
